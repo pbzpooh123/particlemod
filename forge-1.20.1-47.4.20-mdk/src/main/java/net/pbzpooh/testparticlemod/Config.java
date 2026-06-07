@@ -9,12 +9,13 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Forge's config APIs
-@Mod.EventBusSubscriber(modid = TestparticleMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = Testparticlemod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Config
 {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
@@ -45,7 +46,12 @@ public class Config
 
     private static boolean validateItemName(final Object obj)
     {
-        return obj instanceof final String itemName && ForgeRegistries.ITEMS.containsKey(new ResourceLocation(itemName));
+        if (obj instanceof final String itemName) {
+            // tryParse is safe for 1.20.1 and returns null if the string is malformed
+            ResourceLocation location = ResourceLocation.tryParse(itemName);
+            return location != null && ForgeRegistries.ITEMS.containsKey(location);
+        }
+        return false;
     }
 
     @SubscribeEvent
@@ -55,9 +61,12 @@ public class Config
         magicNumber = MAGIC_NUMBER.get();
         magicNumberIntroduction = MAGIC_NUMBER_INTRODUCTION.get();
 
-        // convert the list of strings into a set of items
+        // Safely map strings to ResourceLocations, filtering out any nulls just in case
         items = ITEM_STRINGS.get().stream()
-                .map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
+                .map(ResourceLocation::tryParse)
+                .filter(Objects::nonNull)
+                .map(ForgeRegistries.ITEMS::getValue)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 }
