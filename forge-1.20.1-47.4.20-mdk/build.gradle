@@ -25,7 +25,6 @@ minecraft {
         configureEach {
             property 'mixin.env.remapRefMap', 'true'
 
-            // 👇 FORCE-DISABLE THE CRASHING AAA PARTICLES MIXIN IN DEV ENVIRONMENT 👇
             property 'mixin.config.aaa_particles-common.mixins.json', 'disabled'
 
             workingDirectory project.file('run')
@@ -63,6 +62,15 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    maven {
+        name = 'Chloe Maven'
+        url = 'https://maven.chloeprime.cn:4080/releases/'
+        content {
+            includeGroup "mod.chloeprime"
+            includeGroup "cn.chloeprime"
+        }
+    }
+
     exclusiveContent {
         forRepository {
             maven {
@@ -81,7 +89,7 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // AAA Particles (Version: forge-1.20.1-2.2.0)
-    implementation fg.deobf("maven.modrinth:aaa-particles:aTc9PgXJ")
+    implementation fg.deobf("mod.chloeprime:aaa-particles-forge:1.20.1-1.4.11")
 
     // Architectury API
     implementation fg.deobf("maven.modrinth:architectury-api:1MKTLiiG")
